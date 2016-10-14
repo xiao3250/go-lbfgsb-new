@@ -294,6 +294,7 @@ func (lbfgsb *Lbfgsb) Minimize(
 
 	// Set up callbacks for function, gradient, and logging
 	cId := registerCallback(objective)
+	defer unregisterCallback(cId)
 	callbackData_c := unsafe.Pointer(&cId)
 	var doLogging_c C.int                        // false
 	var logFunctionCallbackData_c unsafe.Pointer // null
@@ -301,6 +302,7 @@ func (lbfgsb *Lbfgsb) Minimize(
 	if lbfgsb.logger != nil {
 		doLogging_c = C.int(1) // true
 		loggerId = registerCallback(lbfgsb.logger)
+		defer unregisterCallback(loggerId)
 		logFunctionCallbackData_c = unsafe.Pointer(&loggerId)
 	}
 
@@ -356,11 +358,6 @@ func (lbfgsb *Lbfgsb) Minimize(
 	// Number of function and gradient evaluations is always the same
 	lbfgsb.statistics.GradientEvaluations = lbfgsb.statistics.FunctionEvaluations
 
-	// Unregister callbacks
-	unregisterCallback(cId)
-	if loggerId > 0 {
-		unregisterCallback(loggerId)
-	}
 	return
 }
 
