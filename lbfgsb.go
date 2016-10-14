@@ -294,7 +294,6 @@ func (lbfgsb *Lbfgsb) Minimize(
 
 	// Set up callbacks for function, gradient, and logging
 	cId := registerCallback(objective)
-	println(cId)
 	callbackData_c := unsafe.Pointer(&cId)
 	var doLogging_c C.int                        // false
 	var logFunctionCallbackData_c unsafe.Pointer // null
