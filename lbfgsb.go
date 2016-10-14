@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"sync"
 	"unsafe"
 )
 
@@ -292,14 +293,16 @@ func (lbfgsb *Lbfgsb) Minimize(
 	upperBounds := makeCCopySlice_Float(lbfgsb.upperBounds, dim)
 
 	// Set up callbacks for function, gradient, and logging
-	callbackData_c := unsafe.Pointer(
-		&callbackData{objective: objective})
+	cId := registerCallback(objective)
+	println(cId)
+	callbackData_c := unsafe.Pointer(&cId)
 	var doLogging_c C.int                        // false
 	var logFunctionCallbackData_c unsafe.Pointer // null
+	var loggerId int
 	if lbfgsb.logger != nil {
 		doLogging_c = C.int(1) // true
-		logFunctionCallbackData_c = unsafe.Pointer(
-			&logCallbackData{logger: lbfgsb.logger})
+		loggerId = registerCallback(lbfgsb.logger)
+		logFunctionCallbackData_c = unsafe.Pointer(&loggerId)
 	}
 
 	// Allocate arrays for return value
@@ -354,6 +357,11 @@ func (lbfgsb *Lbfgsb) Minimize(
 	// Number of function and gradient evaluations is always the same
 	lbfgsb.statistics.GradientEvaluations = lbfgsb.statistics.FunctionEvaluations
 
+	// Unregister callbacks
+	unregisterCallback(cId)
+	if loggerId > 0 {
+		unregisterCallback(loggerId)
+	}
 	return
 }
 
@@ -379,19 +387,44 @@ func (lbfgsb *Lbfgsb) OptimizationStatistics() OptimizationStatistics {
 	return lbfgsb.statistics
 }
 
-// callbackData is a container for the actual objective function and
+// callbackFunctions is a container for the actual objective functions and
 // related data.
-type callbackData struct {
-	objective FunctionWithGradient
+var callbackFunctions = make(map[int]interface{})
+
+// callbackIndex stores an index to use for new callback function.
+var callbackIndex int
+
+// callbackMutex is a mutex preventing simultanious access to callback
+// and callbackIds.
+var callbackMutex sync.Mutex
+
+// registerCallback registers a new callback and returns its' index
+// (>=1).
+func registerCallback(objective interface{}) int {
+	callbackMutex.Lock()
+	defer callbackMutex.Unlock()
+	// ensure minimum index is 1.
+	callbackIndex++
+	for callbackFunctions[callbackIndex] != nil {
+		callbackIndex++
+	}
+	callbackFunctions[callbackIndex] = objective
+	return callbackIndex
 }
 
-// logCallbackData is a container for the logging function.  It might be
-// tempting to just use a function pointer instead of this container,
-// but passing a function pointer to void* in C possibly truncates the
-// address because void* is for data pointers only and function pointers
-// may be wider.
-type logCallbackData struct {
-	logger OptimizationIterationLogger
+// lookupCallback returns a callback function given an index.
+func lookupCallback(i int) interface{} {
+	callbackMutex.Lock()
+	defer callbackMutex.Unlock()
+	return callbackFunctions[i]
+}
+
+// unregisterCallback unregisters a callback by removing it from the
+// callbackFunctions map.
+func unregisterCallback(i int) {
+	callbackMutex.Lock()
+	defer callbackMutex.Unlock()
+	delete(callbackFunctions, i)
 }
 
 // go_objective_function_callback is an adapter between the C callback
@@ -411,11 +444,11 @@ func go_objective_function_callback(
 	// Convert inputs
 	dim := int(dim_c)
 	wrapCArrayAsGoSlice_Float64(point_c, dim, &point)
-	cbData := (*callbackData)(callbackData_c)
+	objective := lookupCallback(*(*int)(callbackData_c)).(FunctionWithGradient)
 
 	// Evaluate the objective function.  Let panics propagate through
 	// C/Fortran.
-	value := cbData.objective.EvaluateFunction(point)
+	value := objective.EvaluateFunction(point)
 
 	// Convert outputs
 	*value_c = C.double(value)
@@ -442,11 +475,11 @@ func go_objective_gradient_callback(
 	// Convert inputs
 	dim := int(dim_c)
 	wrapCArrayAsGoSlice_Float64(point_c, dim, &point)
-	cbData := (*callbackData)(callbackData_c)
+	objective := lookupCallback(*(*int)(callbackData_c)).(FunctionWithGradient)
 
 	// Evaluate the gradient of the objective function.  Let panics
 	// propagate through C/Fortran.
-	gradRet = cbData.objective.EvaluateGradient(point)
+	gradRet = objective.EvaluateGradient(point)
 
 	// Convert outputs
 	wrapCArrayAsGoSlice_Float64(gradient_c, dim, &gradient)
@@ -478,11 +511,11 @@ func go_log_function_callback(
 	wrapCArrayAsGoSlice_Float64(g_c, dim, &g)
 
 	// Get the logging function from the callback data
-	cbData := (*logCallbackData)(logCallbackData_c)
+	logger := lookupCallback(*(*int)(logCallbackData_c)).(OptimizationIterationLogger)
 
 	// Call the logging function.  Let panics propagate through
 	// C/Fortran.
-	cbData.logger(
+	logger(
 		&OptimizationIterationInformation{
 			Iteration:   int(iteration_c),
 			FEvals:      int(fgEvals_c),
