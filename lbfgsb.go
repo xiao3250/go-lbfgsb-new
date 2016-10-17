@@ -396,7 +396,7 @@ var callbackMutex sync.Mutex
 
 // registerCallback registers a new callback and returns its' index
 // (>=1).
-func registerCallback(objective interface{}) uint {
+func registerCallback(f interface{}) uint {
 	callbackMutex.Lock()
 	defer callbackMutex.Unlock()
 	// We always increment callbackIndex to have more or less
@@ -414,10 +414,10 @@ func registerCallback(objective interface{}) uint {
 		// have this kind of problem since all the objects are
 		// unregistered at the end of the function call.
 		if callbackIndex == startIndex {
-			panic("no more space in the map to store an object")
+			panic("no more space in the map to store a callback function")
 		}
 	}
-	callbackFunctions[callbackIndex] = objective
+	callbackFunctions[callbackIndex] = f
 	return callbackIndex
 }
 
