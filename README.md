@@ -31,7 +31,7 @@ the
 [change of cgo rules](https://github.com/golang/go/issues/12416). I
 hope eventially
 [my fix](https://github.com/afbarnard/go-lbfgsb/pull/7) gets accepted
-in the mainstream. For now you can use this repository in your
+to the mainstream. For now you can use this repository in your
 imports. The rest of the README is kept unchanged.
 
 License
