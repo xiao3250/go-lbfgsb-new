@@ -22,6 +22,12 @@ software](http://users.eecs.northwestern.edu/~nocedal/software.html) by
 the authors of the algorithm, Jorge Nocedal et al.  Interfaces are
 provided for Go (Golang), C, and Fortran 2003.
 
+This is a **fork** of [go-lbfgsb](https://github.com/afbarnard/go-lbfgsb)
+by @afbarnard. Here I (@idavydov) have fixed afbarnard/go-lbfgsb#4 (a
+bug related to the
+[change of cgo rules](https://github.com/golang/go/issues/12416)). I
+hope eventially my fix (afbarnard/go-lbfgsb#7) gets accepted in the
+mainstream. For now you can use this repository in your imports.
 
 License
 -------
