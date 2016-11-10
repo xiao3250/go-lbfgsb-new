@@ -303,7 +303,7 @@ func (lbfgsb *Lbfgsb) Minimize(
 		doLogging_c = C.int(1) // true
 		loggerId = registerCallback(lbfgsb.logger)
 		defer unregisterCallback(loggerId)
-		logFunctionCallbackData_c = unsafe.Pointer(&loggerId)
+		logFunctionCallbackData_c = unsafe.Pointer(loggerId)
 	}
 
 	// Allocate arrays for return value
