@@ -295,10 +295,10 @@ func (lbfgsb *Lbfgsb) Minimize(
 	// Set up callbacks for function, gradient, and logging
 	cId := registerCallback(objective)
 	defer unregisterCallback(cId)
-	callbackData_c := unsafe.Pointer(&cId)
+	callbackData_c := unsafe.Pointer(cId)
 	var doLogging_c C.int                        // false
 	var logFunctionCallbackData_c unsafe.Pointer // null
-	var loggerId uint
+	var loggerId uintptr
 	if lbfgsb.logger != nil {
 		doLogging_c = C.int(1) // true
 		loggerId = registerCallback(lbfgsb.logger)
@@ -385,10 +385,10 @@ func (lbfgsb *Lbfgsb) OptimizationStatistics() OptimizationStatistics {
 
 // callbackFunctions is a container for the actual objective functions and
 // related data.
-var callbackFunctions = make(map[uint]interface{})
+var callbackFunctions = make(map[uintptr]interface{})
 
 // callbackIndex stores an index to use for new callback function.
-var callbackIndex uint
+var callbackIndex uintptr
 
 // callbackMutex is a mutex preventing simultanious access to callback
 // and callbackIds.
@@ -396,7 +396,7 @@ var callbackMutex sync.Mutex
 
 // registerCallback registers a new callback and returns its' index
 // (>=1).
-func registerCallback(f interface{}) uint {
+func registerCallback(f interface{}) uintptr {
 	callbackMutex.Lock()
 	defer callbackMutex.Unlock()
 	// We always increment callbackIndex to have more or less
@@ -407,7 +407,7 @@ func registerCallback(f interface{}) uint {
 	for callbackIndex == 0 || callbackFunctions[callbackIndex] != nil {
 		// Find the first free non-zero index.
 		callbackIndex++
-		// If the map is full, i.e. all non-zero uints were
+		// If the map is full, i.e. all non-zero uintptrs were
 		// used, we do not want to loop infinitely. We check
 		// if we already encountered the starting index. If
 		// so, we panic. In practice this is very unlikely to
@@ -422,7 +422,7 @@ func registerCallback(f interface{}) uint {
 }
 
 // lookupCallback returns a callback function given an index.
-func lookupCallback(i uint) interface{} {
+func lookupCallback(i uintptr) interface{} {
 	callbackMutex.Lock()
 	defer callbackMutex.Unlock()
 	return callbackFunctions[i]
@@ -430,7 +430,7 @@ func lookupCallback(i uint) interface{} {
 
 // unregisterCallback unregisters a callback by removing it from the
 // callbackFunctions map.
-func unregisterCallback(i uint) {
+func unregisterCallback(i uintptr) {
 	callbackMutex.Lock()
 	defer callbackMutex.Unlock()
 	delete(callbackFunctions, i)
@@ -453,7 +453,7 @@ func go_objective_function_callback(
 	// Convert inputs
 	dim := int(dim_c)
 	wrapCArrayAsGoSlice_Float64(point_c, dim, &point)
-	objective := lookupCallback(*(*uint)(callbackData_c)).(FunctionWithGradient)
+	objective := lookupCallback(uintptr(callbackData_c)).(FunctionWithGradient)
 
 	// Evaluate the objective function.  Let panics propagate through
 	// C/Fortran.
@@ -484,7 +484,7 @@ func go_objective_gradient_callback(
 	// Convert inputs
 	dim := int(dim_c)
 	wrapCArrayAsGoSlice_Float64(point_c, dim, &point)
-	objective := lookupCallback(*(*uint)(callbackData_c)).(FunctionWithGradient)
+	objective := lookupCallback(uintptr(callbackData_c)).(FunctionWithGradient)
 
 	// Evaluate the gradient of the objective function.  Let panics
 	// propagate through C/Fortran.
@@ -520,7 +520,7 @@ func go_log_function_callback(
 	wrapCArrayAsGoSlice_Float64(g_c, dim, &g)
 
 	// Get the logging function from the callback data
-	logger := lookupCallback(*(*uint)(logCallbackData_c)).(OptimizationIterationLogger)
+	logger := lookupCallback(uintptr(logCallbackData_c)).(OptimizationIterationLogger)
 
 	// Call the logging function.  Let panics propagate through
 	// C/Fortran.
