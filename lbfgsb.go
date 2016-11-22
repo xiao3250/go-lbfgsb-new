@@ -11,7 +11,7 @@ package lbfgsb
 
 // Declarations for Cgo
 
-// #cgo LDFLAGS: -lgfortran -lm
+// #cgo LDFLAGS: -lgfortran -lquadmath -lm
 // #include "lbfgsb_go_interface.h"
 import "C"
 
