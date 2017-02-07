@@ -32,7 +32,8 @@ the
 hope eventially
 [my fix](https://github.com/afbarnard/go-lbfgsb/pull/7) gets accepted
 to the mainstream. For now you can use this repository in your
-imports. The rest of the README is kept unchanged.
+imports. Also with go 1.7 or later you can install without make. The
+rest of the README is mostly kept unchanged.
 
 License
 -------
@@ -113,10 +114,17 @@ Building this software requires:
 Download, Build, Install
 ------------------------
 
-Conveniently, you can use the Go tools to download, build, and install
+If you are using Go 1.7 or later you can install go-lbfgsb just with
+`go get`.
+
+```shell
+[go-wrkspc]$ go get github.com/idavydov/go-lbfgsb
+```
+
+With older versions of Go you have to download, build, and install
 this package, but it is not quite fully automatic: there is an
 intervening step to compile the Fortran code.  This is needed because
-the Go compilers do not know Fortran.
+the Go compilers before 1.7 did not know Fortran.
 
 1. Download.  Using `go get` requires `git`.  If you want to download
    the latest code after having downloaded this package previously, add
@@ -124,7 +132,7 @@ the Go compilers do not know Fortran.
    only download the code and not build or install the package.
 
    ```shell
-   [go-wrkspc]$ go get -d github.com/afbarnard/go-lbfgsb
+   [go-wrkspc]$ go get -d github.com/idavydov/go-lbfgsb
    ```
 
 2. Build Fortran.  Change to the directory containing the downloaded
@@ -135,7 +143,7 @@ the Go compilers do not know Fortran.
    ```shell
    [go-wrkspc]$ echo $GOPATH
    /home/go-pkgs:/home/go-wrkspc
-   [go-wrkspc]$ cd ~/go-pkgs/src/github.com/afbarnard/go-lbfgsb
+   [go-wrkspc]$ cd ~/go-pkgs/src/github.com/idavydov/go-lbfgsb
    [go-lbfgsb]$ make
    [go-lbfgsb]$ cd ~/go-wrkspc
    ```
@@ -144,14 +152,14 @@ the Go compilers do not know Fortran.
    installation.  This builds and installs the package.
 
    ```shell
-   [go-wrkspc]$ go get github.com/afbarnard/go-lbfgsb
+   [go-wrkspc]$ go get github.com/idavydov/go-lbfgsb
    ```
 
 4. Use.  Import the `go-lbfgsb` package into your Go program.  Build
    your program normally.
 
    ```go
-   import lbfgsb "github.com/afbarnard/go-lbfgsb"
+   import lbfgsb "github.com/idavydov/go-lbfgsb"
    ```
 
    ```shell
