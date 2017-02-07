@@ -11,6 +11,17 @@ package lbfgsb
 
 // Declarations for Cgo
 
+// Please note that originally go-lbfgs was compiled with a set of
+// fortran-specific flags. We can use FFLAGS cgo directive to have an
+// original set of flags:
+// // #cgo FFLAGS: -fimplicit-none -finit-local-zero -fbounds-check
+
+// But Cgo does not support FFLAGS yet (github issue #18975).  Also
+// introducing such a directive would break a compatibility with pre
+// 1.7 version of Go.  I think that everything should work properly
+// with the defaul CGO compilation flags.  If you run into issues you
+// can use CGO_FFLAGS environment variable.
+
 // #cgo LDFLAGS: -lgfortran -lquadmath -lm
 // #include "lbfgsb_go_interface.h"
 import "C"
