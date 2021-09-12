@@ -7,7 +7,7 @@ build
 
 # Compilation intermediates
 *.o
-*.mod
+lbfgsb*.mod
 
 # Programs, libraries
 liblbfgsb.a
