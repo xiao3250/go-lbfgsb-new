@@ -44,13 +44,13 @@ lbfgsb/lbfgsb.o: lbfgsb/blas.o lbfgsb/linpack.o lbfgsb/timer.o
 # The Linpack parts do not appear to depend on each other
 
 # Go-Fortran L-BFGS-B interface
-lbfgsb_entry.o: lbfgsb/lbfgsb.o
-lbfgsb_c.o: lbfgsb_entry.o
+lbfgsb__entry.o: lbfgsb/lbfgsb.o
+lbfgsb_c.o: lbfgsb__entry.o
 
 # Libraries and executables
 
 # Object files needed for the libraries
-libObjs := lbfgsb_c.o lbfgsb_entry.o lbfgsb/lbfgsb.o lbfgsb/blas.o lbfgsb/linpack.o lbfgsb/timer.o
+libObjs := lbfgsb_c.o lbfgsb__entry.o lbfgsb/lbfgsb.o lbfgsb/blas.o lbfgsb/linpack.o lbfgsb/timer.o
 
 # Library
 liblbfgsb.a: $(libObjs)

@@ -8,7 +8,7 @@
 ! (There is no way to enforce this interface with the old code without
 ! integrating it into the old code.  This could be done relatively
 ! easily but I have chosen to leave the original as is for now.)
-module lbfgsb_entry
+module lbfgsb
   implicit none
   private
 
@@ -48,4 +48,4 @@ module lbfgsb_entry
      end subroutine setulb
   end interface
 
-end module lbfgsb_entry
+end module lbfgsb

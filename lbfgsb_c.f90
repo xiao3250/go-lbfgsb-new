@@ -9,7 +9,7 @@
 ! used by other code and not just Go.
 module lbfgsb_c
   use, intrinsic :: iso_c_binding
-  use lbfgsb_entry
+  use lbfgsb
   implicit none
   private
 
