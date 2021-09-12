@@ -69,4 +69,4 @@ lbfgsb.syso: $(libObjs)
 
 # Delete derived
 clean:
-	@rm -f *.o *.mod *~ lbfgsb/*.o liblbfgsb.a lbfgsb.syso
+	@rm -f *.o lbfgsb*.mod *~ lbfgsb/*.o liblbfgsb.a lbfgsb.syso
