@@ -10,7 +10,7 @@
 
 # Compiler (I'm only worrying about GCC for now since it supports
 # Fortran, C, and Go.)
-compiler := gcc
+compiler := gcc-11
 # General compiler options, e.g. -O -g
 compile_options := -g
 # General compiler warnings
@@ -44,13 +44,13 @@ lbfgsb/lbfgsb.o: lbfgsb/blas.o lbfgsb/linpack.o lbfgsb/timer.o
 # The Linpack parts do not appear to depend on each other
 
 # Go-Fortran L-BFGS-B interface
-lbfgsb.o: lbfgsb/lbfgsb.o
-lbfgsb_c.o: lbfgsb.o
+lbfgsb_entry.o: lbfgsb/lbfgsb.o
+lbfgsb_c.o: lbfgsb_entry.o
 
 # Libraries and executables
 
 # Object files needed for the libraries
-libObjs := lbfgsb_c.o lbfgsb.o lbfgsb/lbfgsb.o lbfgsb/blas.o lbfgsb/linpack.o lbfgsb/timer.o
+libObjs := lbfgsb_c.o lbfgsb_entry.o lbfgsb/lbfgsb.o lbfgsb/blas.o lbfgsb/linpack.o lbfgsb/timer.o
 
 # Library
 liblbfgsb.a: $(libObjs)
