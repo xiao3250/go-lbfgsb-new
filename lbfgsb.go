@@ -22,7 +22,6 @@ package lbfgsb
 // with the defaul CGO compilation flags.  If you run into issues you
 // can use CGO_FFLAGS environment variable.
 
-// #cgo LDFLAGS: -lgfortran -lquadmath -lm
 // #include "lbfgsb_go_interface.h"
 import "C"
 
